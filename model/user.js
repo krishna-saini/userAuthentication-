@@ -1,25 +1,9 @@
-// const mongoose = require("mongoose");
-
-// const userSchema = new mongoose.Schema({
-//   name: { type: String, default: null },
-//   email: {
-//     type: String,
-//     required: [true, "send an email"],
-//   },
-//   password: {
-//     type: String,
-//   },
-//   token: String,
-// });
-
-// module.exports = mongoose.model("user", userSchema);
 const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
     default: null,
-    require: [true, "Please enter first Name"],
   },
   
   email: {
