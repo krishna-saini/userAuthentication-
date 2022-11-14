@@ -75,6 +75,49 @@ app.post("/registration", async (req, res) => {
   }
 });
 
+// routing for sign in
+app.post("/signin", async (req, res) => {
+  // 1. get all the data
+  const { email, password } = req.body;
+  console.log(email);
+
+  // 2. validate
+  if (!(email || password)) {
+    res.status(400).send("enter email and/or password");
+  }
+
+  // 3. check if email exists in db or not
+  const existingUser = await User.findOne({ email });
+  if (!existingUser) {
+    res.status(400).send("email does not exits. do sign up");
+  }
+
+  // 4. if email exists , match the password
+  if (existingUser && (await bcrypt.compare(password, existingUser.password))) {
+    // create token
+    const token = jwt.sign(
+      { id: existingUser._id, email },
+      `${process.env.SECRET}`,
+      {
+        expiresIn: "2h",
+      }
+    );
+    existingUser.token = token;
+
+    // send the token to the cookies
+    existingUser.password = undefined;
+    const options = {
+      httpOnly: true,
+      expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
+    };
+    res
+      .status(200)
+      .cookie("token", token, options)
+      .json({ sucess: true, token, existingUser });
+  }
+  // 5. what if password doesn;t match with db
+  res.status(400).send("email or password doesn't match with db");
+});
 
 
 app.listen(`${process.env.PORT}`, ()=>{console.log("listening at port");})
